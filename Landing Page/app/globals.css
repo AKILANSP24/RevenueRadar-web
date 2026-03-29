@@ -23,11 +23,6 @@
   --border: oklch(0.25 0.02 250);
   --input: oklch(0.25 0.02 250);
   --ring: oklch(0.62 0.19 240);
-  --chart-1: oklch(0.62 0.19 240);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
   --radius: 0.75rem;
   --sidebar: oklch(0.1 0.02 250);
   --sidebar-foreground: oklch(0.98 0 0);
@@ -37,6 +32,11 @@
   --sidebar-accent-foreground: oklch(0.98 0 0);
   --sidebar-border: oklch(0.25 0.02 250);
   --sidebar-ring: oklch(0.62 0.19 240);
+
+  /* Custom brand colors */
+  --brand-blue: #2E86DE;
+  --brand-green: #10B981;
+  --brand-dark: #0a0f1e;
 }
 
 .dark {
@@ -59,11 +59,6 @@
   --border: oklch(0.25 0.02 250);
   --input: oklch(0.25 0.02 250);
   --ring: oklch(0.62 0.19 240);
-  --chart-1: oklch(0.62 0.19 240);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.1 0.02 250);
   --sidebar-foreground: oklch(0.98 0 0);
   --sidebar-primary: oklch(0.62 0.19 240);
@@ -75,8 +70,8 @@
 }
 
 @theme inline {
-  --font-sans: 'Inter', 'Geist', 'Geist Fallback', system-ui, sans-serif;
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback', monospace;
+  --font-sans: 'Inter', 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -96,11 +91,6 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -119,6 +109,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -128,12 +119,15 @@
   0% {
     transform: translate(0px, 0px) scale(1);
   }
+
   33% {
     transform: translate(30px, -50px) scale(1.1);
   }
+
   66% {
     transform: translate(-20px, 20px) scale(0.9);
   }
+
   100% {
     transform: translate(0px, 0px) scale(1);
   }

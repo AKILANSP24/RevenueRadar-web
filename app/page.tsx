@@ -11,8 +11,10 @@ export default function Home() {
           <span className="text-xl font-bold text-white">RevenueRadar</span>
         </div>
         <Link href="/auth">
-          <button className="px-4 py-2 rounded-lg text-white font-medium"
-            style={{ background: '#2E86DE' }}>
+          <button
+            className="px-4 py-2 rounded-lg text-white font-medium"
+            style={{ background: '#2E86DE' }}
+          >
             Login
           </button>
         </Link>
@@ -20,8 +22,10 @@ export default function Home() {
 
       {/* Hero */}
       <section className="flex flex-col items-center justify-center text-center px-8 py-32">
-        <div className="mb-4 px-3 py-1 rounded-full text-sm font-medium"
-          style={{ background: '#1e3a5f', color: '#2E86DE' }}>
+        <div
+          className="mb-4 px-3 py-1 rounded-full text-sm font-medium"
+          style={{ background: '#1e3a5f', color: '#2E86DE' }}
+        >
           Real-Time Revenue Intelligence
         </div>
         <h1 className="text-5xl font-bold text-white mb-6 max-w-3xl leading-tight">
@@ -34,8 +38,10 @@ export default function Home() {
         </p>
         <div className="flex gap-4">
           <Link href="/auth">
-            <button className="px-8 py-4 rounded-lg text-white font-semibold text-lg"
-              style={{ background: '#2E86DE' }}>
+            <button
+              className="px-8 py-4 rounded-lg text-white font-semibold text-lg"
+              style={{ background: '#2E86DE' }}
+            >
               Get Started Free
             </button>
           </Link>
@@ -57,21 +63,24 @@ export default function Home() {
             {
               icon: '🧠',
               title: 'Context-Aware Detection',
-              desc: 'Our temporal baseline understands what normal looks like at every hour of every day — not just a dumb threshold.'
+              desc: 'Our temporal baseline understands what normal looks like at every hour of every day — not just a dumb threshold.',
             },
             {
               icon: '⚡',
               title: 'Real-Time Alerts',
-              desc: 'Every transaction is scored instantly. Critical anomalies are flagged in seconds with AI-generated explanations.'
+              desc: 'Every transaction is scored instantly. Critical anomalies are flagged in seconds with AI-generated explanations.',
             },
             {
               icon: '📊',
               title: 'Multi-Source Analytics',
-              desc: 'Unify Stripe, Shopify, and PayPal data into a single intelligence dashboard with zero configuration.'
-            }
+              desc: 'Unify Stripe, Shopify, and PayPal data into a single intelligence dashboard with zero configuration.',
+            },
           ].map((f, i) => (
-            <div key={i} className="p-6 rounded-xl border border-gray-800"
-              style={{ background: '#111827' }}>
+            <div
+              key={i}
+              className="p-6 rounded-xl border border-gray-800"
+              style={{ background: '#111827' }}
+            >
               <div className="text-4xl mb-4">{f.icon}</div>
               <h3 className="text-xl font-semibold text-white mb-2">{f.title}</h3>
               <p className="text-gray-400">{f.desc}</p>
@@ -87,12 +96,26 @@ export default function Home() {
         </h2>
         <div className="flex flex-col md:flex-row justify-center gap-8 max-w-4xl mx-auto">
           {[
-            { step: '01', title: 'Connect Sources', desc: 'Your revenue streams flow in via simulator or real webhooks' },
-            { step: '02', title: 'AI Scores Every Event', desc: 'Temporal baseline engine classifies each transaction instantly' },
-            { step: '03', title: 'You Get Intelligence', desc: 'Live dashboard shows anomalies, health score, and AI explanations' }
+            {
+              step: '01',
+              title: 'Connect Sources',
+              desc: 'Your revenue streams flow in via simulator or real webhooks',
+            },
+            {
+              step: '02',
+              title: 'AI Scores Every Event',
+              desc: 'Temporal baseline engine classifies each transaction instantly',
+            },
+            {
+              step: '03',
+              title: 'You Get Intelligence',
+              desc: 'Live dashboard shows anomalies, health score, and AI explanations',
+            },
           ].map((s, i) => (
             <div key={i} className="flex-1 text-center p-6">
-              <div className="text-5xl font-bold mb-4" style={{ color: '#2E86DE' }}>{s.step}</div>
+              <div className="text-5xl font-bold mb-4" style={{ color: '#2E86DE' }}>
+                {s.step}
+              </div>
               <h3 className="text-xl font-semibold text-white mb-2">{s.title}</h3>
               <p className="text-gray-400">{s.desc}</p>
             </div>
