@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link"
 import { Button } from "@/components/ui/button";
 import { Activity } from "lucide-react";
 
@@ -15,12 +16,14 @@ export function Navbar() {
             RevenueRadar
           </span>
         </div>
-        <Button
-          variant="outline"
-          className="border-[#10B981]/30 bg-[#10B981]/5 text-white hover:bg-[#10B981]/10 hover:text-white hover:border-[#10B981]/50"
-        >
-          Login
-        </Button>
+        <Link href="/auth">
+          <Button
+            variant="outline"
+            className="border-[#10B981]/30 bg-[#10B981]/5 text-white hover:bg-[#10B981]/10 hover:text-white hover:border-[#10B981]/50"
+          >
+            Login
+          </Button>
+        </Link>
       </div>
     </nav>
   );

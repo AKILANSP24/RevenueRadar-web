@@ -96,7 +96,9 @@ Border:        rgba(255,255,255,0.1)
 - All new files must be .tsx (TypeScript)
 - All secrets via .env.local only — never hardcode
 - shadcn components in components/ui/ — never modify directly
-- Supabase client initialized via lib/supabase.js singleton
+- lib/supabase.js is the single Supabase client — never use createClient() directly in components
+- Dashboard layout uses onAuthStateChange for session detection
+- Auth card imports supabase from @/lib/supabase
 - No inline styles where Tailwind class exists
 - Every new component needs 'use client' if it uses hooks
 - Color values must match the Color Scheme above exactly
