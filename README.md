@@ -19,7 +19,7 @@
 |-------|---------|
 | **Student** | SP Akilan |
 | **Register No.** | 22MIA1191 |
-| **Programme** | B.Tech CSE — Business Analytics |
+| **Programme** | M.Tech CSE — Business Analytics |
 | **Institution** | Vellore Institute of Technology, Chennai |
 | **Module** | Cloud Ecosystem (Semester Project) |
 | **Submission** | Real-Time Revenue Anomaly Detection SaaS |
