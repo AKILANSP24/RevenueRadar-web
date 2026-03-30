@@ -80,9 +80,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <nav className="flex flex-col gap-1">
                     {[
                         { label: 'Dashboard', href: '/dashboard', icon: '📊' },
-                        { label: 'Anomalies', href: '/dashboard', icon: '🚨' },
-                        { label: 'Reports', href: '/dashboard', icon: '📈' },
-                        { label: 'Settings', href: '/dashboard', icon: '⚙️' },
+                        { label: 'Anomalies', href: '/dashboard/anomalies', icon: '🚨' },
+                        { label: 'Reports', href: '/dashboard/reports', icon: '📈' },
+                        { label: 'Settings', href: '/dashboard/settings', icon: '⚙️' },
                     ].map((item) => (
                         <Link key={item.label} href={item.href}
                             className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors text-sm">

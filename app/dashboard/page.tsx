@@ -141,6 +141,26 @@ export default function Dashboard() {
         ].filter(d => d.value > 0)
     }, [events])
 
+    const exportCSV = () => {
+        if (events.length === 0) return;
+        const headers = ['timestamp', 'source', 'amount', 'severity', 'z_score', 'ai_explanation'];
+        const csvRows = [headers.join(',')];
+        
+        events.forEach(e => {
+            const explanation = e.ai_explanation ? `"${e.ai_explanation.replace(/"/g, '""')}"` : '""';
+            csvRows.push(`${e.timestamp},${e.source},${e.amount},${e.severity},${e.z_score},${explanation}`);
+        });
+        
+        const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `anomaly_events_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center h-[70vh] gap-4">
@@ -159,9 +179,18 @@ export default function Dashboard() {
                         Real-time AI anomaly intelligence
                     </p>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-400 bg-[#111827] px-3 py-1.5 rounded-lg border border-gray-800 shadow-sm">
-                    <RefreshCcw className="h-3.5 w-3.5" />
-                    Last updated: {lastRefresh.toLocaleTimeString()}
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 text-xs text-green-400 bg-green-500/10 px-3 py-1.5 rounded-lg border border-green-500/20 shadow-sm font-medium">
+                        <span className="relative flex h-2 w-2">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+                            <span className="relative inline-flex h-full w-full rounded-full bg-green-500"></span>
+                        </span>
+                        LIVE
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-gray-400 bg-[#111827] px-3 py-1.5 rounded-lg border border-gray-800 shadow-sm">
+                        <RefreshCcw className="h-3.5 w-3.5" />
+                        Last updated: {lastRefresh.toLocaleTimeString()}
+                    </div>
                 </div>
             </div>
 
@@ -297,9 +326,18 @@ export default function Dashboard() {
                         <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                         <h2 className="text-white font-semibold">Live Anomaly Feed</h2>
                     </div>
-                    <span className="text-xs text-gray-500 bg-gray-900 px-3 py-1 rounded-full border border-gray-800">
-                        Top {events.length} recent
-                    </span>
+                    <div className="flex items-center gap-3">
+                        <button 
+                            onClick={exportCSV} 
+                            disabled={events.length === 0}
+                            className="text-xs text-white bg-[#2E86DE] hover:bg-[#2573c4] px-4 py-1.5 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Export CSV
+                        </button>
+                        <span className="text-xs text-gray-500 bg-gray-900 px-3 py-1 rounded-full border border-gray-800">
+                            Top {events.length} recent
+                        </span>
+                    </div>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
@@ -342,11 +380,11 @@ export default function Dashboard() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 max-w-xs">
-                                            <div className="text-gray-300 truncate">
+                                            <div className="text-gray-300 truncate cursor-help" title={e.ai_explanation || 'Atypical pattern detected'}>
                                                 {e.ai_explanation || 'Atypical pattern detected'}
                                             </div>
                                             <div className="text-gray-500 text-xs mt-0.5">
-                                                Z-Score: <span className={e.z_score > 3 ? 'text-red-400' : 'text-gray-400'}>{Number(e.z_score).toFixed(2)}</span>
+                                                Z-Score: <span className={e.z_score >= 4 ? 'text-red-500 font-bold' : e.z_score >= 2 ? 'text-orange-500 font-bold' : 'text-green-500 font-bold'}>{Number(e.z_score).toFixed(2)}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
