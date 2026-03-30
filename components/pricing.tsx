@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Check, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 const features = [
   "Up to 10,000 transactions/month",
@@ -65,9 +66,11 @@ export function Pricing() {
               </ul>
 
               {/* CTA */}
-              <Button className="group w-full gap-2 bg-[#2E86DE] text-white hover:bg-[#2573c4]">
-                Get Started Free
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <Button asChild className="group w-full gap-2 bg-[#2E86DE] text-white hover:bg-[#2573c4]">
+                <Link href="/auth">
+                  Get Started Free
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
               </Button>
             </div>
           </div>

@@ -16,14 +16,11 @@ export function Navbar() {
             RevenueRadar
           </span>
         </div>
-        <Link href="/auth">
-          <Button
-            variant="outline"
-            className="border-[#10B981]/30 bg-[#10B981]/5 text-white hover:bg-[#10B981]/10 hover:text-white hover:border-[#10B981]/50"
-          >
+        <Button asChild variant="outline" className="border-[#10B981]/30 bg-[#10B981]/5 text-white hover:bg-[#10B981]/10 hover:text-white hover:border-[#10B981]/50">
+          <Link href="/auth">
             Login
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
     </nav>
   );

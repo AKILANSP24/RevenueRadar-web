@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play } from "lucide-react";
+import Link from "next/link";
 
 export function Hero() {
   return (
@@ -53,19 +54,25 @@ export function Hero() {
           {/* CTA Buttons */}
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Button
+              asChild
               size="lg"
               className="group h-12 gap-2 bg-[#2E86DE] px-6 text-base font-medium text-white hover:bg-[#2573c4]"
             >
-              Get Started Free
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <Link href="/auth">
+                Get Started Free
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
             </Button>
             <Button
+              asChild
               variant="outline"
               size="lg"
               className="h-12 gap-2 border-white/20 bg-transparent px-6 text-base font-medium text-white hover:bg-white/5 hover:text-white"
             >
-              <Play className="h-4 w-4" />
-              View Demo
+              <Link href="/dashboard">
+                <Play className="h-4 w-4" />
+                View Demo
+              </Link>
             </Button>
           </div>
         </div>
