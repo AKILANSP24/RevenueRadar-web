@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import Link from 'next/link'
 import { CriticalAlertBanner } from '@/components/CriticalAlertBanner'
+import { DemoModeOverlay } from '@/components/DemoMode'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<{ email?: string } | null>(null)
@@ -15,19 +16,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         async function init() {
             const { data: { session } } = await supabase.auth.getSession()
-
             if (session && isMounted) {
                 setUser(session.user)
                 setChecking(false)
                 return
             }
-
             await new Promise(resolve => setTimeout(resolve, 1000))
             if (!isMounted) return
-
             const { data: { session: session2 } } = await supabase.auth.getSession()
             if (!isMounted) return
-
             if (session2) {
                 setUser(session2.user)
                 setChecking(false)
@@ -74,6 +71,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Critical alert banner — floats above everything */}
             <CriticalAlertBanner />
 
+            {/* Demo mode overlay — triggered by Ctrl+Shift+D */}
+            <DemoModeOverlay />
+
             <aside className="w-56 border-r border-gray-800 flex flex-col p-4" style={{ background: '#070b14' }}>
                 <div className="flex items-center gap-2 mb-8 px-2">
                     <span className="text-xl">⚡</span>
@@ -84,6 +84,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         { label: 'Dashboard', href: '/dashboard', icon: '📊' },
                         { label: 'Anomalies', href: '/dashboard/anomalies', icon: '🚨' },
                         { label: 'Reports', href: '/dashboard/reports', icon: '📈' },
+                        { label: 'Architecture', href: '/dashboard/architecture', icon: '🏗️' },
                         { label: 'Settings', href: '/dashboard/settings', icon: '⚙️' },
                     ].map((item) => (
                         <Link key={item.label} href={item.href}
@@ -94,6 +95,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     ))}
                 </nav>
                 <div className="mt-auto">
+                    {/* Demo mode hint */}
+                    <div className="mx-2 mb-3 px-3 py-2 rounded-lg bg-red-500/5 border border-red-500/10">
+                        <p className="text-[10px] text-red-400/70 font-mono text-center">
+                            Ctrl+Shift+D
+                        </p>
+                        <p className="text-[9px] text-gray-600 text-center mt-0.5">Demo mode</p>
+                    </div>
                     <div className="px-3 py-2 text-xs text-gray-600 truncate">{user?.email}</div>
                     <button
                         onClick={async () => { await supabase.auth.signOut(); router.push('/') }}
