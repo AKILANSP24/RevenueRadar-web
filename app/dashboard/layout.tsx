@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import Link from 'next/link'
+import { CriticalAlertBanner } from '@/components/CriticalAlertBanner'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<{ email?: string } | null>(null)
@@ -13,7 +14,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         let isMounted = true
 
         async function init() {
-            // First attempt
             const { data: { session } } = await supabase.auth.getSession()
 
             if (session && isMounted) {
@@ -22,7 +22,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 return
             }
 
-            // Wait 1 second and retry — handles race condition after redirect
             await new Promise(resolve => setTimeout(resolve, 1000))
             if (!isMounted) return
 
@@ -43,7 +42,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             (event, session) => {
                 if (!isMounted) return
-                console.log('AUTH EVENT:', event, !!session)
                 if (event === 'SIGNED_OUT') {
                     setUser(null)
                     router.push('/auth')
@@ -72,6 +70,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     return (
         <div className="min-h-screen flex" style={{ background: '#0a0f1e' }}>
+
+            {/* Critical alert banner — floats above everything */}
+            <CriticalAlertBanner />
+
             <aside className="w-56 border-r border-gray-800 flex flex-col p-4" style={{ background: '#070b14' }}>
                 <div className="flex items-center gap-2 mb-8 px-2">
                     <span className="text-xl">⚡</span>
@@ -93,12 +95,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </nav>
                 <div className="mt-auto">
                     <div className="px-3 py-2 text-xs text-gray-600 truncate">{user?.email}</div>
-                    <button onClick={async () => { await supabase.auth.signOut(); router.push('/') }}
+                    <button
+                        onClick={async () => { await supabase.auth.signOut(); router.push('/') }}
                         className="w-full text-left px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 text-sm transition-colors">
                         🚪 Logout
                     </button>
                 </div>
             </aside>
+
             <main className="flex-1 overflow-auto p-6">{children}</main>
         </div>
     )
