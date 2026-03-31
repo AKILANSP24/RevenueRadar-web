@@ -85,6 +85,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         { label: 'Anomalies', href: '/dashboard/anomalies', icon: '🚨' },
                         { label: 'Reports', href: '/dashboard/reports', icon: '📈' },
                         { label: 'Architecture', href: '/dashboard/architecture', icon: '🏗️' },
+                        { label: 'Incidents', href: '/dashboard/incidents', icon: '🛡️' },
                         { label: 'Settings', href: '/dashboard/settings', icon: '⚙️' },
                     ].map((item) => (
                         <Link key={item.label} href={item.href}

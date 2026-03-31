@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
+import { ExecutiveStatusBar } from '@/components/ExecutiveStatusBar'
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
     PieChart, Pie, Cell, Legend, RadialBarChart, RadialBar, BarChart, Bar
@@ -332,6 +333,7 @@ export default function Dashboard() {
 
     return (
         <div className="max-w-7xl mx-auto pb-12">
+            <ExecutiveStatusBar />
 
             {/* ── Header ── */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">

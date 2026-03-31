@@ -2,10 +2,9 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
-import {
-    AlertTriangle, Search, Download, RefreshCw,
-    Filter, Clock, Flame
-} from 'lucide-react'
+import { AlertTriangle, Search, Download, RefreshCw, Filter, Clock, Flame, ChevronDown, ChevronUp } from 'lucide-react'
+import { TimeRangeSelector, TimeRange, getTimeRangeStart } from '@/components/TimeRangeSelector'
+import { AnomalyDetailModal } from '@/components/AnomalyDetailModal'
 
 type Anomaly = {
     id: string
@@ -13,7 +12,7 @@ type Anomaly = {
     source: string
     amount: number
     timestamp: string
-    severity: string
+    severity: 'critical' | 'warning' | 'normal'
     z_score: number
     baseline_mean: number
     baseline_std: number
@@ -25,12 +24,6 @@ const SEVERITY_COLORS: Record<string, string> = {
     critical: 'bg-red-500/20 text-red-400 border border-red-500/30',
     warning: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
     normal: 'bg-green-500/20 text-green-400 border border-green-500/30',
-}
-
-const ZSCORE_COLOR = (z: number) => {
-    if (z >= 3.5) return 'text-red-400'
-    if (z >= 2.0) return 'text-yellow-400'
-    return 'text-green-400'
 }
 
 function AnomalyHeatmap({ anomalies }: { anomalies: Anomaly[] }) {
@@ -85,21 +78,16 @@ function AnomalyHeatmap({ anomalies }: { anomalies: Anomaly[] }) {
                         <Flame className="w-5 h-5 text-orange-400" />
                         <p className="text-white font-semibold">24x7 Anomaly Heatmap</p>
                     </div>
-                    <p className="text-gray-500 text-xs mt-0.5">
-                        Which hours and days generate the most anomalies — visualises the temporal baseline Z-score system
-                    </p>
+                    <p className="text-gray-500 text-xs mt-0.5">Temporal Z-score baseline — anomaly frequency by hour and day</p>
                 </div>
                 <div className="flex gap-4 text-xs text-gray-400">
                     <span className="flex items-center gap-1.5">
                         <Clock className="w-3 h-3 text-orange-400" />
                         Peak hour: <span className="text-white font-semibold ml-1">{peakHour}:00</span>
                     </span>
-                    <span>
-                        Peak day: <span className="text-white font-semibold ml-1">{DAYS[peakDay]}</span>
-                    </span>
+                    <span>Peak day: <span className="text-white font-semibold ml-1">{DAYS[peakDay]}</span></span>
                 </div>
             </div>
-
             <div className="overflow-x-auto">
                 <div className="min-w-[640px]">
                     <div className="flex mb-1 ml-10">
@@ -142,12 +130,17 @@ export default function AnomaliesPage() {
     const [search, setSearch] = useState('')
     const [severityFilter, setSeverityFilter] = useState('all')
     const [sourceFilter, setSourceFilter] = useState('all')
+    const [range, setRange] = useState<TimeRange>('24h')
+    const [expandedId, setExpandedId] = useState<string | null>(null)
+    const [modalEvent, setModalEvent] = useState<Anomaly | null>(null)
 
     const fetchAnomalies = async () => {
         setRefreshing(true)
+        const since = getTimeRangeStart(range)
         const { data, error } = await supabase
             .from('anomaly_events')
             .select('*')
+            .gte('timestamp', since)
             .order('timestamp', { ascending: false })
             .limit(300)
         if (!error && data) { setAnomalies(data); setFiltered(data) }
@@ -155,7 +148,7 @@ export default function AnomaliesPage() {
         setRefreshing(false)
     }
 
-    useEffect(() => { fetchAnomalies() }, [])
+    useEffect(() => { fetchAnomalies() }, [range])
 
     useEffect(() => {
         let result = [...anomalies]
@@ -197,14 +190,14 @@ export default function AnomaliesPage() {
                     <AlertTriangle className="w-7 h-7 text-yellow-400" />
                     <div>
                         <h1 className="text-2xl font-bold text-white">Anomalies</h1>
-                        <p className="text-gray-500 text-sm">Full anomaly history with temporal heatmap</p>
+                        <p className="text-gray-500 text-sm">Full anomaly history with temporal heatmap — click any row to investigate</p>
                     </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
+                    <TimeRangeSelector value={range} onChange={r => setRange(r)} />
                     <button onClick={fetchAnomalies} disabled={refreshing}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#111827] border border-gray-800 text-gray-400 hover:text-white hover:border-[#2E86DE] transition-all text-sm">
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#111827] border border-gray-800 text-gray-400 hover:text-white text-sm transition-all">
                         <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                        Refresh
                     </button>
                     <button onClick={exportCSV}
                         className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#2E86DE] text-white hover:bg-[#2E86DE]/80 transition-all text-sm font-medium">
@@ -242,7 +235,6 @@ export default function AnomaliesPage() {
                     <option value="all">All Severities</option>
                     <option value="critical">Critical</option>
                     <option value="warning">Warning</option>
-                    <option value="normal">Normal</option>
                 </select>
                 <select value={sourceFilter} onChange={e => setSourceFilter(e.target.value)}
                     className="px-3 py-2 bg-[#0a0f1e] border border-gray-800 rounded-lg text-sm text-white focus:outline-none focus:border-[#2E86DE]">
@@ -253,68 +245,108 @@ export default function AnomaliesPage() {
                 <span className="text-gray-500 text-sm ml-auto">{filtered.length} results</span>
             </div>
 
+            {/* Table with expandable rows */}
             <div className="bg-[#111827] border border-gray-800 rounded-xl overflow-hidden">
                 {loading ? (
                     <div className="flex items-center justify-center h-48 text-gray-500">Loading anomalies...</div>
                 ) : filtered.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-48 text-gray-500 gap-2">
                         <AlertTriangle className="w-8 h-8 opacity-30" />
-                        <p className="text-sm">No anomalies found. Start the Python pipeline to detect events.</p>
+                        <p className="text-sm">No anomalies in this time range.</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-gray-800 text-gray-500 text-xs uppercase tracking-wider">
-                                    <th className="text-left px-4 py-3">Event ID</th>
+                                    <th className="w-8 px-2 py-3" />
                                     <th className="text-left px-4 py-3">Source</th>
                                     <th className="text-right px-4 py-3">Amount</th>
                                     <th className="text-center px-4 py-3">Severity</th>
                                     <th className="text-right px-4 py-3">Z-Score</th>
-                                    <th className="text-right px-4 py-3">Baseline</th>
                                     <th className="text-left px-4 py-3">Timestamp</th>
-                                    <th className="text-left px-4 py-3">AI Explanation</th>
+                                    <th className="text-center px-4 py-3">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filtered.map((a, i) => (
-                                    <tr key={a.id}
-                                        className={`border-b border-gray-800/50 hover:bg-white/[0.02] transition-colors ${i % 2 === 0 ? '' : 'bg-white/[0.01]'}`}>
-                                        <td className="px-4 py-3 font-mono text-xs text-gray-500">{a.event_id?.slice(0, 8)}...</td>
-                                        <td className="px-4 py-3">
-                                            <span className="px-2 py-0.5 rounded bg-[#2E86DE]/10 text-[#2E86DE] border border-[#2E86DE]/20 text-xs font-medium capitalize">
-                                                {a.source}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 text-right text-white font-medium">
-                                            Rs.{Number(a.amount).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-                                        </td>
-                                        <td className="px-4 py-3 text-center">
-                                            <span className={`px-2 py-0.5 rounded text-xs font-semibold capitalize ${SEVERITY_COLORS[a.severity] || ''}`}>
-                                                {a.severity}
-                                            </span>
-                                        </td>
-                                        <td className={`px-4 py-3 text-right font-mono font-bold ${ZSCORE_COLOR(a.z_score)}`}>
-                                            {a.z_score?.toFixed(2)}s
-                                        </td>
-                                        <td className="px-4 py-3 text-right text-gray-400 text-xs">
-                                            Rs.{Number(a.baseline_mean).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-                                        </td>
-                                        <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">
-                                            {new Date(a.timestamp).toLocaleString()}
-                                        </td>
-                                        <td className="px-4 py-3 text-gray-400 text-xs max-w-xs">
-                                            {a.ai_explanation
-                                                ? <span className="line-clamp-2">{a.ai_explanation}</span>
-                                                : <span className="text-gray-700 italic">No AI explanation</span>}
-                                        </td>
-                                    </tr>
+                                    <>
+                                        <tr key={a.id}
+                                            onClick={() => setExpandedId(expandedId === a.id ? null : a.id)}
+                                            className={`border-b border-gray-800/50 hover:bg-white/[0.02] transition-colors cursor-pointer ${i % 2 === 0 ? '' : 'bg-white/[0.01]'}`}>
+                                            <td className="px-2 py-3 text-center">
+                                                {expandedId === a.id
+                                                    ? <ChevronUp className="w-3.5 h-3.5 text-[#2E86DE] mx-auto" />
+                                                    : <ChevronDown className="w-3.5 h-3.5 text-gray-600 mx-auto" />}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <span className="px-2 py-0.5 rounded bg-[#2E86DE]/10 text-[#2E86DE] border border-[#2E86DE]/20 text-xs font-medium capitalize">
+                                                    {a.source}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-right text-white font-medium">
+                                                ₹{Number(a.amount).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
+                                                <span className={`px-2 py-0.5 rounded text-xs font-semibold capitalize ${SEVERITY_COLORS[a.severity] || ''}`}>
+                                                    {a.severity}
+                                                </span>
+                                            </td>
+                                            <td className={`px-4 py-3 text-right font-mono font-bold text-xs ${a.z_score >= 4 ? 'text-red-400' : a.z_score >= 2 ? 'text-yellow-400' : 'text-green-400'
+                                                }`}>
+                                                {a.z_score?.toFixed(2)}σ
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">
+                                                {new Date(a.timestamp).toLocaleString()}
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
+                                                <button
+                                                    onClick={e => { e.stopPropagation(); setModalEvent(a) }}
+                                                    className="text-[10px] px-2 py-1 rounded bg-[#2E86DE]/10 text-[#2E86DE] border border-[#2E86DE]/20 hover:bg-[#2E86DE]/20 transition-all">
+                                                    Investigate
+                                                </button>
+                                            </td>
+                                        </tr>
+
+                                        {/* Expanded row */}
+                                        {expandedId === a.id && (
+                                            <tr key={`${a.id}-expanded`} className="border-b border-gray-800/50 bg-[#0d1424]">
+                                                <td colSpan={7} className="px-6 py-4">
+                                                    <div className="grid grid-cols-3 gap-4">
+                                                        <div className="col-span-2">
+                                                            <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                                                🧠 Groq AI Analysis
+                                                            </p>
+                                                            <p className="text-gray-300 text-sm leading-relaxed">
+                                                                {a.ai_explanation || 'No AI explanation available.'}
+                                                            </p>
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-2">Baseline Stats</p>
+                                                            {[
+                                                                { label: 'Baseline Mean', value: `₹${Number(a.baseline_mean).toLocaleString('en-IN', { maximumFractionDigits: 0 })}` },
+                                                                { label: 'Std Deviation', value: `₹${Number(a.baseline_std).toLocaleString('en-IN', { maximumFractionDigits: 0 })}` },
+                                                                { label: 'Upper Bound (2σ)', value: `₹${(Number(a.baseline_mean) + 2 * Number(a.baseline_std)).toLocaleString('en-IN', { maximumFractionDigits: 0 })}` },
+                                                            ].map(s => (
+                                                                <div key={s.label} className="flex justify-between text-xs">
+                                                                    <span className="text-gray-500">{s.label}</span>
+                                                                    <span className="text-white font-mono">{s.value}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </>
                                 ))}
                             </tbody>
                         </table>
                     </div>
                 )}
             </div>
+
+            <AnomalyDetailModal event={modalEvent} onClose={() => setModalEvent(null)} />
         </div>
     )
 }
